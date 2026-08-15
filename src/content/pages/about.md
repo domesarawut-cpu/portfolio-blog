@@ -52,11 +52,8 @@ title: "À propos / About Me"
 
 ## 🚀 Développement Continu | Ongoing Development
 
-```bash file="certifications_and_learning_path.sh"
-# Objectifs actuels de certification et d'apprentissage en cours
+**1. Microsoft Certified: Azure Administrator Associate (AZ-104)**
+*   **Focus :** Gestion sécurisée des identités Entra ID, gouvernance Azure et réseaux virtuels.
 
-1. Microsoft Certified: Azure Administrator Associate (AZ-104)
-   -> Focus : Gestion sécurisée des identités Entra ID, gouvernance Azure et réseaux virtuels.
-
-2. KodeKloud DevOps Learning Path
-   -> Focus : Automatisation des opérations TI et scripting.
+**2. KodeKloud DevOps Learning Path**
+*   **Focus :** Automatisation des opérations TI et scripting.
