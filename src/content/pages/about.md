@@ -4,9 +4,9 @@ title: "À propos / About Me"
 ---
 
 > [!INFO] Profil Professionnel | Professional Summary
-> **FR:** Technicien en technologie de l'information fort d'un bagage global de plus de 5 ans dans le domaine de l'informatique de gestion et des infrastructures réseaux. Reconnu pour ma grande capacité d'analyse et ma résolution de problèmes complexes (Niveau 2-3), je suis engagé dans l'amélioration continue et la sécurisation des écosystèmes technologiques institutionnels.
+> **FR:** Technicien TI spécialisé dans les infrastructures cloud et la cybersécurité. Fort de 2 ans d'expérience technique intensive au sein d'un environnement entreprise (filiale d'Hydro-Québec) et soutenu par un solide bagage antérieur en relations clients et gestion opérationnelle. Reconnu pour ma capacité à résoudre des incidents complexes (Niveau 2-3) sous pression, tout en maintenant un taux de satisfaction utilisateur exceptionnel de 4.8/5.
 >
-> **EN:** IT Technician with over 5 years of global experience in business computing and network infrastructure. Recognized for strong analytical skills and complex problem-solving abilities (Tier 2-3), I am committed to continuous improvement and securing institutional technology ecosystems.
+> **EN:** IT Technician specializing in cloud infrastructure and cybersecurity. Backed by 2 years of intensive technical experience in an enterprise environment and a strong prior background in client relations and operational management. Recognized for the ability to resolve complex incidents (Tier 2-3) under pressure while maintaining an exceptional user satisfaction rate of 4.8/5.
 
 ## 🎯 Objectif | Objective
 
@@ -34,6 +34,12 @@ title: "À propos / About Me"
 
 > [!SUCCESS] Résultat Clé | Key Achievement
 > Maintien d'un taux de résolution exceptionnel avec une satisfaction utilisateur de **4.8/5** sur plus de 850 billets.
+
+### Expériences Antérieures : Gestion & Communications / Prior Experience
+**Diverses entreprises (Ventes, Marketing, Production Télévisuelle)** | *Thaïlande (Avant 2022)*
+
+- **FR:** Développement de compétences transversales (Soft Skills) cruciales pour les opérations TI. Gestion proactive des attentes clients, communication stratégique et résolution de problèmes sous haute pression lors de productions soumises à des délais stricts. Ces expériences constituent la fondation de mon approche orientée client et de mon efficacité en gestion d'incidents.
+- **EN:** Developed highly transferable soft skills crucial for IT operations. Proactive management of client expectations, strategic communication, and problem-solving in high-pressure environments with strict production deadlines. These experiences form the foundation of my customer-centric approach and efficiency in incident management.
 
 ## 🎓 Formation | Education
 
