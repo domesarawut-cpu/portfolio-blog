@@ -23,7 +23,7 @@ export default defineAstroPaperConfig({
     showArchives: true,
     showBackButton: true,
     editPost: {
-      enabled: true,
+      enabled: false,
       url: "https://github.com/domesarawut-cpu/portfolio-blog/edit/main/",
     },
     search: "pagefind",
