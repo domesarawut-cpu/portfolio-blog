@@ -71,6 +71,7 @@ New-AzVirtualNetwork `
   -AddressPrefix "10.0.0.0/16" `
   -Subnet @(New-AzVirtualNetworkSubnetConfig -Name "xfusion-subnet" -AddressPrefix "10.0.0.0/24")
 ```
+![Azure Configuration Subnet Vnet](@/assets/images/2026-08-16_create-subnet-vnet.webp)
 
 > [!TIP] Architectural Insight: The Azure "Rule of 5" for Subnet Sizing
 > When designing IP address spaces in Azure, a critical consideration is understanding Azure's native IP allocation mechanics. 
