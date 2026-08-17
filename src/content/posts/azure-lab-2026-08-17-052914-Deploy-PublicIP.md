@@ -4,7 +4,7 @@ slug: azure-static-public-ip-standard-sku-provisioning-secure-ingress
 pubDatetime: 2026-08-17T00:00:00Z
 description: "Mise en place d’une adresse IP publique Azure Standard et statique pour fournir un point d’entrée externe fiable et sécurisé à l’infrastructure de l’équipe Nautilus DevOps."
 featured: false
-draft: true
+draft: false
 tags: ["Azure", "Cloud", "Public IP", "Networking"]
 ---
 
@@ -41,7 +41,11 @@ This operation was initially completed through the **Azure Portal**, but it is s
 
 > [!INFO]
 > This Public IP is provisioned as a standalone network resource and is ready to be attached later to a Network Interface or Load Balancer.
-
+> [!TIP] Architectural Design Decision: Public IP SKU
+> While the provisioning requirements were broad, the **Standard SKU** with a **Static Allocation Method** was deliberately chosen over the Basic SKU. 
+>
+> The Basic SKU is on a deprecation path and lacks modern enterprise capabilities. The Standard SKU is secure by default (closed to inbound traffic unless explicitly permitted by an NSG), supports Zone Redundancy, and provides a fixed IP address that guarantees stability for DNS records and third-party firewall whitelisting.
+> 
 ### Action
 The implementation followed a simple resource provisioning workflow in the Azure Portal:
 
@@ -57,6 +61,8 @@ From an automation perspective, this portal-based task maps directly to concise 
 
 > [!SUCCESS]
 > The Public IP was successfully provisioned and is immediately reusable for downstream network bindings.
+
+![Azure Deploy Public IP](@/assets/images/2026-08-16_deploy-publicIP.webp)
 
 > [!NOTE]
 > For repeatability across environments, this provisioning step should ideally be embedded into a scripted deployment workflow rather than repeated manually in the portal.
