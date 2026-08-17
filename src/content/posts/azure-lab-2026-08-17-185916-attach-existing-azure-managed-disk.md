@@ -118,7 +118,10 @@ echo "UUID=UUID_VALUE /mnt/datadisk ext4 defaults,nofail 1 2" | sudo tee -a /etc
 
 # 6. Mount the filesystem immediately without rebooting
 sudo mount -a
-[!TIP] Architectural Best Practice: The /etc/fstab File
-Using the universally unique identifier (UUID) instead of the block device name (like /dev/sdc) is a mandatory industry standard. Azure does not guarantee that block device paths will remain consistent after a VM restart.
+```
 
-Additionally, adding the nofail parameter ensures that the VM boot process will not halt if the data disk is temporarily detached or unavailable.
+> [!TIP] Architectural Best Practice: The /etc/fstab File
+> Using the universally unique identifier (UUID) instead of the block device name (like /dev/sdc) is a mandatory industry standard. Azure does not guarantee that block device paths will remain
+> consistent after a VM restart.
+>
+> Additionally, adding the nofail parameter ensures that the VM boot process will not halt if the data disk is temporarily detached or unavailable.
