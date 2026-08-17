@@ -68,25 +68,26 @@ From an automation perspective, this portal-based task maps directly to concise 
 > [!NOTE]
 > For repeatability across environments, this provisioning step should ideally be embedded into a scripted deployment workflow rather than repeated manually in the portal.
 
-## Azure CLI
+### Azure CLI
 
 ```bash file="provision-public-ip.sh"
 az network public-ip create \
-  --resource-group <resource-group> \
+  --resource-group kml_rg_main-99650e5e8bc74e04 \
   --name nautilus-pip \
+  --location eastus \
   --sku Standard \
   --allocation-method Static \
   --version IPv4
 ```
 
-## Azure PowerShell
+### Azure PowerShell
 
 ```powershell file="provision-public-ip.ps1"
 New-AzPublicIpAddress `
-  -ResourceGroupName "<resource-group>" `
+  -ResourceGroupName "kml_rg_main-99650e5e8bc74e04" `
   -Name "nautilus-pip" `
+  -Location "East US" `
   -Sku Standard `
   -AllocationMethod Static `
-  -IpAddressVersion IPv4 `
-  -Location "<location>"
+  -IpAddressVersion IPv4
 ```
