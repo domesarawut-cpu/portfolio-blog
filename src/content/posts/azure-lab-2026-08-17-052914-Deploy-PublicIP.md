@@ -41,6 +41,7 @@ This operation was initially completed through the **Azure Portal**, but it is s
 
 > [!INFO]
 > This Public IP is provisioned as a standalone network resource and is ready to be attached later to a Network Interface or Load Balancer.
+
 > [!TIP] Architectural Design Decision: Public IP SKU
 > While the provisioning requirements were broad, the **Standard SKU** with a **Static Allocation Method** was deliberately chosen over the Basic SKU. 
 >
