@@ -4,7 +4,7 @@ slug: attach-existing-azure-managed-disk-to-vm-with-explicit-lun-assignment
 pubDatetime: 2026-08-17T00:00:00Z
 description: "Cette intervention décrit le rattachement contrôlé d’un disque managé Azure existant à une machine virtuelle afin de rétablir l’accès aux données persistantes pendant une phase de migration."
 featured: false
-draft: true
+draft: false
 tags: ["Azure", "Cloud", "Managed Disk", "Virtual Machine"]
 ---
 
@@ -92,3 +92,33 @@ Update-AzVM `
   -ResourceGroupName $ResourceGroup `
   -VM $vm
 ```
+
+### OS-Level Configuration (Linux)
+
+Attaching the disk at the infrastructure layer is only the first phase. To make the storage usable and ensure data persists reliably across VM reboots, the disk must be initialized and mounted at the operating system level.
+
+Below is the standard Linux administration workflow executed via SSH to bring the attached LUN 0 online:
+
+```bash file="mount-datadisk.sh"
+# 1. Identify the newly attached block device (LUN 0 is typically mapped to /dev/sdc)
+lsblk -o NAME,HCTL,SIZE,MOUNTPOINT
+
+# 2. Format the disk (Assuming a raw, unformatted disk for a new migration)
+sudo mkfs.ext4 /dev/sdc
+
+# 3. Create a dedicated mount point
+sudo mkdir -p /mnt/datadisk
+
+# 4. Retrieve the absolute disk UUID for deterministic mounting
+sudo blkid /dev/sdc
+
+# 5. Append the UUID to /etc/fstab to guarantee persistence across reboots
+# (Replace UUID_VALUE with the actual UUID output from the previous command)
+echo "UUID=UUID_VALUE /mnt/datadisk ext4 defaults,nofail 1 2" | sudo tee -a /etc/fstab
+
+# 6. Mount the filesystem immediately without rebooting
+sudo mount -a
+[!TIP] Architectural Best Practice: The /etc/fstab File
+Using the universally unique identifier (UUID) instead of the block device name (like /dev/sdc) is a mandatory industry standard. Azure does not guarantee that block device paths will remain consistent after a VM restart.
+
+Additionally, adding the nofail parameter ensures that the VM boot process will not halt if the data disk is temporarily detached or unavailable.
