@@ -4,7 +4,7 @@ slug: attach-existing-network-interface-to-azure-vm
 pubDatetime: 2026-08-18T00:00:00Z
 description: "Ce guide explique comment attacher une carte réseau existante à une machine virtuelle Azure en respectant la contrainte de désallocation préalable."
 featured: false
-draft: true
+draft: false
 tags: ["Azure", "Cloud", "Virtual Machine", "Network Interface"]
 ---
 
@@ -65,7 +65,13 @@ This is a good example of a common transition from GUI-based administration to r
 > [!NOTE]
 > If the VM has only one NIC and you are changing primary connectivity, validate IP configuration, NSG associations, and effective routes after the update.
 
-## Azure CLI
+> [!TIP] Architectural Insight: Multi-NIC Configurations & Routing
+> Attaching a secondary NIC to an existing VM introduces complexities at the OS layer. 
+> 
+> 1. **Primary Designation:** Azure requires exactly one NIC to be designated as the *Primary* interface. This primary NIC dictates the default gateway for the VM.
+> 2. **Asymmetric Routing:** In Linux/Windows, if traffic enters the secondary NIC, the OS might attempt to reply via the primary NIC's default gateway, causing the traffic to be dropped. When implementing multi-NIC VMs in production, ensure that OS-level static routing (e.g., `iproute2` in Linux) is configured correctly to handle ingress and egress traffic on the correct interfaces.
+
+### Azure CLI
 
 ```bash file="attach-nic-to-vm.sh"
 #!/usr/bin/env bash
@@ -90,20 +96,19 @@ az vm start \
   --name "$VM_NAME"
 ```
 
-## Azure PowerShell
+### Azure PowerShell
 
 ```powershell file="Attach-NicToVm.ps1"
 $ResourceGroup = "<resource-group>"
 $VmName = "nautilus-vm"
 $NicName = "nautilus-nic"
 
-Stop-AzVM -ResourceGroupName $ResourceGroup -Name $VmName -Force
+Stop-AzVM -ResourceGroupName $ResourceGroup -Name$VmName -Force
 
-$vm = Get-AzVM -ResourceGroupName $ResourceGroup -Name $VmName
-$nic = Get-AzNetworkInterface -ResourceGroupName $ResourceGroup -Name $NicName
+$vm = Get-AzVM -ResourceGroupName$ResourceGroup -Name $VmName$nic = Get-AzNetworkInterface -ResourceGroupName $ResourceGroup -Name$NicName
 
-Add-AzVMNetworkInterface -VM $vm -Id $nic.Id
-Update-AzVM -ResourceGroupName $ResourceGroup -VM $vm
+Add-AzVMNetworkInterface -VM $vm -Id$nic.Id
+Update-AzVM -ResourceGroupName $ResourceGroup -VM$vm
 
-Start-AzVM -ResourceGroupName $ResourceGroup -Name $VmName
+Start-AzVM -ResourceGroupName $ResourceGroup -Name$VmName
 ```
