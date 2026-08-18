@@ -41,8 +41,8 @@ The task targeted an existing Azure virtual machine and an already provisioned n
 From an Azure architecture perspective, NIC attachment to an existing VM is not a hot-plug operation. The VM must first be transitioned to a **deallocated** state before Azure allows the compute model to be updated.
 
 This was primarily a portal-based operation, but the same workflow maps cleanly to headless execution through Azure CLI or Azure PowerShell.
+
 ![Azure Configuration Multi-NIC](@/assets/images/2026-08-18_attaching-nic-to-vm.webp)
-![Azure Configuration](@/assets/images/azure-task-20260818-024808.webp)
 
 > [!INFO]
 > A VM can only use compatible NIC configurations. Ensure the NIC exists in the same region and can be associated with the target VM before starting the change.
@@ -58,6 +58,8 @@ The implementation followed a controlled two-step sequence:
 5. Confirm that `nautilus-nic` is now associated with `nautilus-vm`.
 
 This is a good example of a common transition from GUI-based administration to repeatable Infrastructure as Code or scripted operations. While the portal is useful for one-off validation, production-grade changes should be reproducible through automation.
+
+![Azure Configuration](@/assets/images/azure-task-20260818-024808.webp)
 
 > [!SUCCESS]
 > The NIC attachment completed successfully after the VM was deallocated, validating the expected Azure operational constraint and resolution path.
