@@ -41,7 +41,7 @@ The task targeted an existing Azure virtual machine and an already provisioned n
 From an Azure architecture perspective, NIC attachment to an existing VM is not a hot-plug operation. The VM must first be transitioned to a **deallocated** state before Azure allows the compute model to be updated.
 
 This was primarily a portal-based operation, but the same workflow maps cleanly to headless execution through Azure CLI or Azure PowerShell.
-
+![Azure Configuration Multi-NIC](@/assets/images/2026-08-18_attaching-nic-to-vm.webp)
 ![Azure Configuration](@/assets/images/azure-task-20260818-024808.webp)
 
 > [!INFO]
