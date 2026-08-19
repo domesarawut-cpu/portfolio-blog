@@ -48,7 +48,7 @@ The portal-based action can be translated into concise scripted operations by re
 
 > [!TIP] Architectural Insight: Zero Trust & Public IPs
 > Associating a Public IP enables external reachability at the network layer, but under Azure's Zero Trust architecture, effective access is explicitly denied by default. Connectivity ultimately depends on proper **Network Security Group (NSG)** rules, guest OS firewall settings, and active listening services on the VM.
->
+
 > [!NOTE] This task was originally completed in the Azure Portal, but the CLI and PowerShell equivalents provide a cleaner operational baseline for scripted administration and future IaC adoption.
 
 ### Azure CLI
