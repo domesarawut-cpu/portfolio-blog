@@ -1,10 +1,10 @@
 ---
 title: "Mise à l’échelle verticale d’une machine virtuelle Azure pour corriger un goulot d’étranglement de performance"
-slug: azure-vm-vertical-scaling-resize-standard-b1s-to-standard-b2s
+slug: azure-vm-vertical-scaling-resize
 pubDatetime: 2026-08-19T00:00:00Z
 description: "Cette opération présente le redimensionnement vertical d’une VM Azure afin d’augmenter ses ressources CPU et mémoire et de rétablir des performances stables."
 featured: false
-draft: true
+draft: false
 tags: ["Azure", "Cloud", "Virtual Machine", "Azure CLI"]
 ---
 
@@ -48,7 +48,10 @@ This was a straightforward compute resize operation on an already deployed VM. F
 
 The resize was completed successfully through the Azure Portal, then mapped to concise Infrastructure as Code style commands for repeatability and operational standardization.
 
-#### Azure CLI
+> [!TIP] Architectural Insight: Vertical vs. Horizontal Scaling
+> It is crucial to communicate to stakeholders that **Vertical Scaling (Scale-Up)** always incurs downtime, as the hypervisor must reallocate the VM to a physical host cluster that supports the new hardware profile. For mission-critical, zero-downtime applications, cloud architects prefer **Horizontal Scaling (Scale-Out)** using Virtual Machine Scale Sets (VMSS) behind a Load Balancer.
+
+### Azure CLI
 
 Use `az vm resize` to change the VM SKU directly.
 
@@ -77,7 +80,7 @@ az vm show \
   --output table
 ```
 
-#### Azure PowerShell
+### Azure PowerShell
 
 Use `Update-AzVM` after updating the VM size property.
 
