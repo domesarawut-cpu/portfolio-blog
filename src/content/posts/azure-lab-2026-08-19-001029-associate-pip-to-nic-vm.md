@@ -83,7 +83,7 @@ az network nic show \
   --output table
 ```
 
-#### Azure PowerShell
+### Azure PowerShell
 Use the following concise PowerShell script to update the NIC and attach the existing Public IP:
 
 ```powershell file="Associate-PublicIpToNic.ps1"
