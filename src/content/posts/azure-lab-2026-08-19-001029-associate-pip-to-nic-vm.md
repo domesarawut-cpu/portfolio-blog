@@ -5,7 +5,7 @@ pubDatetime: 2026-08-19T00:00:00Z
 description: "Association d’une adresse IP publique statique existante à la carte réseau d’une machine virtuelle Azure afin d’activer l’accès entrant externe de manière contrôlée."
 featured: false
 draft: false
-tags: ["Azure", "Cloud", "Azure CLI", "PowerShell"]
+tags: ["Azure", "Cloud", "Network Interface", "Public IP"]
 ---
 
 ## Table of Contents
