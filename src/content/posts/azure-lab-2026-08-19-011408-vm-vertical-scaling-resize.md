@@ -36,10 +36,11 @@ The target workload was hosted on an existing Azure Virtual Machine with the fol
 - **Previous SKU:** `Standard_B1s`
 - **New SKU:** `Standard_B2s`
 - **Expected Final State:** `Running`
+![Azure Configuration](@/assets/images/2026-08-19_vertical-scaling-scaleup-vm.webp)
 
 This was a straightforward compute resize operation on an already deployed VM. From an architectural standpoint, no application redesign, network reconfiguration, or storage migration was required. The scope was limited to changing the VM size to increase available compute capacity.
 
-![Azure Configuration](@/assets/images/azure-task-20260819-011354.webp)
+![Azure Configuration](@/assets/images/azure-task-20260819-vm-size-vertical-scaling.webp)
 
 > [!WARNING]
 > Vertical scaling of an Azure VM typically requires a **restart or deallocation/reallocation cycle**. Plan the operation during an approved maintenance window to avoid unexpected service disruption.
