@@ -4,7 +4,7 @@ slug: azure-associate-existing-public-ip-to-vm-nic
 pubDatetime: 2026-08-19T00:00:00Z
 description: "Association d’une adresse IP publique statique existante à la carte réseau d’une machine virtuelle Azure afin d’activer l’accès entrant externe de manière contrôlée."
 featured: false
-draft: true
+draft: false
 tags: ["Azure", "Cloud", "Azure CLI", "PowerShell"]
 ---
 
@@ -39,14 +39,17 @@ The objective was to bind the existing static Public IP resource to the VM’s p
 
 This operation can be performed headlessly using Azure CLI or Azure PowerShell, making it suitable for repeatable administration and future Infrastructure as Code alignment.
 
-![Azure Configuration](@/assets/images/azure-task-20260819-001013.webp)
+![Azure Configuration](@/assets/images/azure-task-20260819_associate-pip-to-nic-vm.webp)
 
 > [!INFO] The update targets the NIC IP configuration directly. This is the Azure-native method when attaching an existing Public IP to an already deployed VM network interface.
 
 ### Action
 The portal-based action can be translated into concise scripted operations by retrieving the existing NIC and Public IP, then updating the NIC IP configuration to reference the Public IP resource.
 
-#### Azure CLI
+> [!TIP] Architectural Insight: Zero Trust & Public IPs
+> Associating a Public IP enables external reachability at the network layer, but under Azure's Zero Trust architecture, effective access is explicitly denied by default. Connectivity ultimately depends on proper **Network Security Group (NSG)** rules, guest OS firewall settings, and active listening services on the VM.
+
+### Azure CLI
 Use the following Azure CLI script to associate the existing Public IP with the existing NIC:
 
 ```bash file="associate-public-ip-to-nic.sh"
