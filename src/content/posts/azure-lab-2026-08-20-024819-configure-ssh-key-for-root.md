@@ -4,7 +4,7 @@ slug: root-passwordless-ssh-setup-linux-vm-authorized-keys
 pubDatetime: 2026-08-20T00:00:00Z
 description: "Mise en place d’un accès SSH par clé publique pour le compte root, avec validation des permissions POSIX et test de connexion sans mot de passe."
 featured: false
-draft: true
+draft: false
 tags: ["Azure", "Cloud", "SSH", "Linux"]
 ---
 
