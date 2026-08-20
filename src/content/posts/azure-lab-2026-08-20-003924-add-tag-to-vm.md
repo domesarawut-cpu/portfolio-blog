@@ -38,7 +38,7 @@ Resource scope:
 - **Tag Key:** `Environment`
 - **Tag Value:** `dev`
 
-![Azure Configuration](@/assets/images/azure-task-20260820-003908.webp)
+![Azure Configuration](@/assets/images/azure-task-20260820-003908-add-tag-to-vm.webp)
 
 > [!INFO] The implementation below explicitly preserves existing tags by merging the new tag into the current tag set instead of replacing the full tag object.
 
@@ -76,7 +76,7 @@ az tag update \
 
 ### Azure PowerShell
 
-Similarly, modern Azure PowerShell provides the Update-AzTag cmdlet. Using the Merge operation negates the need to manually iterate through existing tags via hashtables.
+Similarly, modern Azure PowerShell provides the `Update-AzTag` cmdlet. Using the Merge operation negates the need to manually iterate through existing tags via hashtables.
 
 ```powershell file="Apply-VmTagMerge.ps1"
 $ResourceGroupName = "kml_rg_main-760a8eef02ce484d"
@@ -92,7 +92,7 @@ Update-AzTag -ResourceId $vm.Id -Tag @{$TagKey=$TagValue} -Operation Merge
 ```
 
 > [!WARNING]
-Never use az resource update --set tags or Set-AzResource -Tag directly without retrieving existing tags first, as these legacy commands perform a hard overwrite (Replace) and will silently delete all pre-existing metadata.
+Never use `az resource update --set tags` or `Set-AzResource -Tag` directly without retrieving existing tags first, as these legacy commands perform a hard overwrite (Replace) and will silently delete all pre-existing metadata.
 
 ### Validation
 
