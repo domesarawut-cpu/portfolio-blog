@@ -4,8 +4,8 @@ slug: azure-vm-resource-tagging-append-merge-existing-tags-with-cli-powershell
 pubDatetime: 2026-08-20T00:00:00Z
 description: "Mise en conformité d’une machine virtuelle Azure par ajout non destructif du tag Environment=dev afin d’améliorer la gouvernance, la traçabilité et l’allocation des coûts."
 featured: false
-draft: true
-tags: ["Azure", "Cloud", "Azure CLI", "PowerShell"]
+draft: false
+tags: ["Azure", "Cloud", "Azure tags", "Azure CLI", "PowerShell"]
 ---
 
 ## Table of Contents
@@ -46,9 +46,9 @@ Resource scope:
 
 The portal-based update validated the functional requirement, but production-grade operations should use scriptable methods. The key requirement from an automation perspective is to append the new tag without deleting existing metadata already assigned to the VM.
 
-#### Azure CLI approach
+### Azure CLI
 
-The Azure CLI method reads the current tag set, merges the new key/value pair, and submits the updated tag object back to the resource.
+The modern Azure CLI approach utilizes the native `az tag update` command with the `Merge` operation. This is the safest and most efficient method.
 
 ```bash file="apply-vm-tag-merge.sh"
 #!/usr/bin/env bash
@@ -59,37 +59,24 @@ VM_NAME="datacenter-vm"
 TAG_KEY="Environment"
 TAG_VALUE="dev"
 
+# 1. Retrieve the Resource ID
 RESOURCE_ID="$(az vm show \
   --resource-group "$RESOURCE_GROUP" \
   --name "$VM_NAME" \
   --query id \
   --output tsv)"
 
-CURRENT_TAGS="$(az resource show \
-  --ids "$RESOURCE_ID" \
-  --query tags \
-  --output json)"
-
-MERGED_TAGS="$(jq -c \
-  --arg key "$TAG_KEY" \
-  --arg value "$TAG_VALUE" \
-  '. // {} | . + {($key): $value}' <<< "$CURRENT_TAGS")"
-
-az resource update \
-  --ids "$RESOURCE_ID" \
-  --set tags="$MERGED_TAGS" \
-  --output none
-
-az resource show \
-  --ids "$RESOURCE_ID" \
-  --query tags
+# 2. Safely merge the new tag using native Azure CLI operations
+az tag update \
+  --resource-id "$RESOURCE_ID" \
+  --operation Merge \
+  --tags "$TAG_KEY=$TAG_VALUE" \
+  --output table
 ```
 
-> [!NOTE] This script uses `jq` for a clean JSON merge. It is concise, predictable, and avoids overwriting unrelated existing tags.
+### Azure PowerShell
 
-#### Azure PowerShell approach
-
-The PowerShell method follows the same principle: retrieve the VM resource, preserve existing tags, append the new entry, and update the resource.
+Similarly, modern Azure PowerShell provides the Update-AzTag cmdlet. Using the Merge operation negates the need to manually iterate through existing tags via hashtables.
 
 ```powershell file="Apply-VmTagMerge.ps1"
 $ResourceGroupName = "kml_rg_main-760a8eef02ce484d"
@@ -97,33 +84,21 @@ $VmName = "datacenter-vm"
 $TagKey = "Environment"
 $TagValue = "dev"
 
-$vm = Get-AzVM -ResourceGroupName $ResourceGroupName -Name $VmName
-$resource = Get-AzResource -ResourceId $vm.Id
+# 1. Retrieve the Virtual Machine object
+$vm = Get-AzVM -ResourceGroupName $ResourceGroupName -Name$VmName
 
-$tags = @{}
-if ($resource.Tags) {
-    $resource.Tags.GetEnumerator() | ForEach-Object {
-        $tags[$_.Key] = $_.Value
-    }
-}
-
-$tags[$TagKey] = $TagValue
-
-Set-AzResource -ResourceId $resource.ResourceId -Tag $tags -Force | Out-Null
-
-(Get-AzResource -ResourceId $resource.ResourceId).Tags
+# 2. Safely merge the new tag using native Azure PowerShell operations
+Update-AzTag -ResourceId $vm.Id -Tag @{$TagKey=$TagValue} -Operation Merge
 ```
 
-> [!WARNING] Using a direct tag replacement command without first merging the existing tag set can unintentionally remove metadata already used for governance, billing, or automation.
+> [!WARNING]
+Never use az resource update --set tags or Set-AzResource -Tag directly without retrieving existing tags first, as these legacy commands perform a hard overwrite (Replace) and will silently delete all pre-existing metadata.
 
-#### Validation
+### Validation
 
-After execution, validation should confirm that:
-- the VM still retains any pre-existing tags;
-- the `Environment` tag exists;
-- the value is set to `dev`.
+After execution, validation should confirm that the VM still retains any pre-existing tags and that the `Environment:dev` tag is successfully appended.
 
-Example CLI validation:
+CLI validation:
 
 ```bash file="validate-vm-tags.sh"
 az vm show \
@@ -133,10 +108,10 @@ az vm show \
   --output json
 ```
 
-Example PowerShell validation:
+PowerShell validation:
 
 ```powershell file="Validate-VmTags.ps1"
 (Get-AzVM -ResourceGroupName "kml_rg_main-760a8eef02ce484d" -Name "datacenter-vm").Tags
 ```
 
-> [!SUCCESS] The VM tag was successfully appended in a non-destructive manner, making the procedure suitable for operational automation and future policy-alignment workflows.
+> [!SUCCESS] The VM metadata was successfully updated using native merge operations, ensuring zero impact on pre-existing governance tags. Making the procedure suitable for operational automation and future policy-alignment workflows.
