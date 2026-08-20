@@ -38,7 +38,7 @@ The implementation pattern was intentionally minimal and shell-driven:
 
 This was handled as a CLI/headless operation using standard Bash commands rather than GUI-based administration.
 
-![Azure Configuration](@/assets/images/azure-task-20260820-024802.webp)
+![Terminal Setup](@/assets/images/azure-task-20260820-024802-configure-ssh-key-root-access.webp)
 
 > [!INFO] Architectural Insight
 > Direct Root SSH access is generally a production anti-pattern because it weakens Zero Trust principles and reduces auditability. A better operational model is to authenticate as a named user, enforce least privilege, and escalate with `sudo` so that accountability, session traceability, and access governance remain intact.
@@ -47,51 +47,42 @@ This was handled as a CLI/headless operation using standard Bash commands rather
 
 The setup was completed by creating the root SSH directory if needed, copying the client public key into `authorized_keys`, enforcing the required ownership and permissions, and validating passwordless access.
 
+The implementation followed a precise, interactive terminal sequence to ensure proper key placement and strict POSIX permission enforcement. This hands-on approach guarantees that the SSH daemon's security prerequisites are met.
+
+**Step 1: Connect to the target VM and escalate privileges**
 ```bash file="setup-root-passwordless-ssh.sh"
-#!/usr/bin/env bash
-set -euo pipefail
+# Connect to the VM as the default administrative user
+ssh -i ~/.ssh/id_rsa azureuser@<VM_PUBLIC_IP>
 
-PUBKEY_FILE="${HOME}/.ssh/id_rsa.pub"
-
-if [[ ! -f "$PUBKEY_FILE" ]]; then
-  echo "Public key not found: $PUBKEY_FILE" >&2
-  exit 1
-fi
-
-sudo mkdir -p /root/.ssh
-sudo touch /root/.ssh/authorized_keys
-
-if ! sudo grep -qxF "$(cat "$PUBKEY_FILE")" /root/.ssh/authorized_keys; then
-  sudo bash -c "cat '$PUBKEY_FILE' >> /root/.ssh/authorized_keys"
-fi
-
-sudo chown -R root:root /root/.ssh
-sudo chmod 700 /root/.ssh
-sudo chmod 600 /root/.ssh/authorized_keys
-
-echo "Root SSH key installation completed successfully."
+# Escalate to root
+sudo su -
 ```
 
-```bash file="validate-root-ssh-login.sh"
-#!/usr/bin/env bash
-set -euo pipefail
+**Step 2: Configure the SSH directory and inject the public key**
+```bash file="setup-root-passwordless-ssh.sh"
+# Create the .ssh directory and enforce strict directory permissions (700)
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
 
-VM_HOST="nautilus-vm"
+# Use a text editor to paste the client's public key (from /root/.ssh/id_rsa.pub)
+nano ~/.ssh/authorized_keys
 
-ssh -o PasswordAuthentication=no -o PreferredAuthentications=publickey root@"$VM_HOST" "whoami && hostname"
+# Enforce strict file permissions (600) to satisfy SSH daemon security checks
+chmod 600 ~/.ssh/authorized_keys
+
+# Exit the root session and disconnect from the VM
+exit
+exit
 ```
 
-If direct command execution on the VM was required after an initial administrative login, the same configuration could be applied interactively:
-
-```bash file="manual-root-key-injection.sh"
-sudo mkdir -p /root/.ssh
-sudo touch /root/.ssh/authorized_keys
-sudo bash -c 'cat ~/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys'
-sudo chown -R root:root /root/.ssh
-sudo chmod 700 /root/.ssh
-sudo chmod 600 /root/.ssh/authorized_keys
+**Step 3: Validate passwordless root access**
+```bash file="Validate-passwordless-root-access.sh"
+# From the Azure client host, test the connection using the root identity
+ssh -i /root/.ssh/id_rsa root@<VM_PUBLIC_IP>
 ```
 
-> [!WARNING] OpenSSH will reject key-based authentication if the `.ssh` directory or `authorized_keys` file is too permissive. Always validate ownership and permissions after key injection.
+> [!WARNING] OpenSSH will strictly reject key-based authentication if the `.ssh` directory or `authorized_keys` file is too permissive. Enforcing `700` and `600` permissions is a non-negotiable security requirement.
+> 
+![Terminal Setup](@/assets/images/2026-08-20_configure-ssh-key-root-access.webp)
 
 > [!SUCCESS] Validation succeeded when SSH authenticated `root` using the installed public key and no password prompt was presented.
