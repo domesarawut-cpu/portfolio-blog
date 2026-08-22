@@ -17,10 +17,10 @@ title: "À propos / About Me"
 
 | Domaine / Domain | Technologies & Compétences / Skills |
 | :--- | :--- |
-| **Écosystème Microsoft** | Microsoft 365, Azure, Entra ID (MFA, Accès conditionnels), Active Directory (GPO, DNS, DHCP) |
-| **Infrastructures & Virtualisation** | Gestion de serveurs physiques, VMware, Surveillance avancée des capacités |
-| **Réseaux & Cybersécurité** | Protocoles TCP/IP, Switch, Firewalls, VPN, VLAN, Gestion des vulnérabilités |
-| **Opérations & Automatisation** | Escalade L2/L3, Analyse de la cause racine (RCA), Documentation ITIL, PowerShell, Jira |
+| **`Écosystème Microsoft`** | Microsoft 365, Azure, Entra ID (MFA, Accès conditionnels), Active Directory (GPO, DNS, DHCP) |
+| **`Infrastructures & Virtualisation`** | Gestion de serveurs physiques, VMware, Surveillance avancée des capacités |
+| **`Réseaux & Cybersécurité`** | Protocoles TCP/IP, Switch, Firewalls, VPN, VLAN, Gestion des vulnérabilités |
+| **`Opérations & Automatisation`** | Escalade L2/L3, Analyse de la cause racine (RCA), Documentation ITIL, PowerShell, Jira |
 
 ## 💼 Expérience Professionnelle | Professional Experience
 
