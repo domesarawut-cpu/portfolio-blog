@@ -75,7 +75,7 @@ The portal-based task can be translated into concise, repeatable automation usin
 3. Append the SSH inbound rule.
 4. Validate the resulting rule set.
 
-### Azure CLI
+#### Azure CLI
 
 ```bash file="create-nsg-rules.sh"
 RG="kml_rg_main-202650c067be4ed9"
@@ -114,7 +114,7 @@ az network nsg rule create \
   --destination-port-ranges 22
 ```
 
-### Azure PowerShell
+#### Azure PowerShell
 
 ```powershell file="create-nsg-rules.ps1"
 $ResourceGroupName = "kml_rg_main-202650c067be4ed9"
@@ -153,7 +153,7 @@ $nsg | Add-AzNetworkSecurityRuleConfig `
 $nsg | Set-AzNetworkSecurityGroup
 ```
 
-### Validation Commands
+#### Validation Commands
 
 ```bash file="validate-nsg-rules.sh"
 az network nsg rule list \
