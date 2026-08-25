@@ -1,10 +1,10 @@
 ---
 title: "Provisionner un disque managé Azure autonome pour une migration d’infrastructure"
-slug: azure-managed-disk-provisioning-standalone-disk-cli-powershell
+slug: azure-managed-disk-provisioning-standalone-disk
 pubDatetime: 2026-08-25T00:00:00Z
 description: "Création d’un disque managé Azure autonome de 2 Gio en Standard_LRS pour accompagner une migration d’infrastructure avec une gestion plus granulaire des données."
 featured: false
-draft: true
+draft: false
 tags: ["Azure", "Cloud", "Managed Disk", "Azure CLI"]
 ---
 
@@ -52,7 +52,7 @@ The implementation below intentionally keeps the logic minimal and idiomatic, ma
 > [!NOTE]
 > The disk is created as an empty managed disk and can later be attached to a VM or used in subsequent migration workflows.
 
-#### Azure CLI
+### Azure CLI
 
 ```bash file="create-managed-disk.sh"
 az disk create \
@@ -63,7 +63,7 @@ az disk create \
   --sku Standard_LRS
 ```
 
-#### Azure PowerShell
+### Azure PowerShell
 
 ```powershell file="Create-ManagedDisk.ps1"
 New-AzDiskConfig `
@@ -75,6 +75,6 @@ New-AzDisk `
   -ResourceGroupName "kml_rg_main-4eac42a8c1bd40ca" `
   -DiskName "xfusion-disk"
 ```
-
+![Azure Configuration](@/assets/images/2026-08-25-azure-managed-disk.webp)
 > [!SUCCESS]
 > This implementation converts a portal-validated configuration into repeatable command-line automation, supporting consistency and future IaC alignment with minimal operational overhead.
