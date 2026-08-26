@@ -4,7 +4,7 @@ slug: azure-public-blob-container-anonymous-access
 pubDatetime: 2026-08-26T00:00:00Z
 description: "Mise en œuvre d’un compte de stockage Azure et d’un conteneur Blob public avec accès anonyme, accompagnée d’un avertissement de sécurité sur les risques d’exposition des données."
 featured: false
-draft: false
+draft: true
 tags: ["Azure", "Cloud", "Azure Blob Storage", "Azure CLI", "Blob Container"]
 ---
 
