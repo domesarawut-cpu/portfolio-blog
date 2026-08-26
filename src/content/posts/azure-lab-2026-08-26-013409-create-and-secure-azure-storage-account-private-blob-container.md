@@ -55,7 +55,7 @@ The deployment was implemented in Azure as a lightweight storage security baseli
 
 This is a headless, CLI-first deployment pattern suitable for repeatable administration and future IaC adoption. No complex networking topology was required for this task because the core objective was secure object storage provisioning with restricted blob exposure.
 
-![Azure Configuration](@/assets/images/azure-task-20260826-013352-create-and-secure-azure-storage-account-private-blob-container.webp)
+![Azure Configuration](@/assets/images/azure-task-20260826-013352.webp)
 
 > [!INFO]
 > **Architectural Insight — Defense in Depth**  
