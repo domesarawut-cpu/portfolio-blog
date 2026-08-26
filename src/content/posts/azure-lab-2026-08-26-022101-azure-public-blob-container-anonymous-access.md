@@ -1,11 +1,11 @@
 ---
 title: "Provisionner un conteneur Blob Azure public avec accès anonyme"
-slug: azure-public-blob-container-anonymous-access-cli-powershell
+slug: azure-public-blob-container-anonymous-access
 pubDatetime: 2026-08-26T00:00:00Z
 description: "Mise en œuvre d’un compte de stockage Azure et d’un conteneur Blob public avec accès anonyme, accompagnée d’un avertissement de sécurité sur les risques d’exposition des données."
 featured: false
-draft: true
-tags: ["Azure", "Cloud", "Azure Blob Storage", "Azure CLI"]
+draft: false
+tags: ["Azure", "Cloud", "Azure Blob Storage", "Azure CLI", "Blob Container"]
 ---
 
 ## Table of Contents
@@ -59,14 +59,11 @@ The steps below convert the lab objective into reproducible Infrastructure as Co
 #!/usr/bin/env bash
 set -euo pipefail
 
-RESOURCE_GROUP="rg-storage-lab"
+# Remplacer par le nom du groupe de ressources fourni dans le laboratoire
+RESOURCE_GROUP="<RESOURCE_GROUP_NAME>"
 LOCATION="eastus"
 STORAGE_ACCOUNT="datacenterst32222"
 CONTAINER_NAME="datacenter-blob-8567"
-
-az group create \
-  --name "$RESOURCE_GROUP" \
-  --location "$LOCATION"
 
 az storage account create \
   --name "$STORAGE_ACCOUNT" \
@@ -83,7 +80,6 @@ az storage account create \
 #!/usr/bin/env bash
 set -euo pipefail
 
-RESOURCE_GROUP="rg-storage-lab"
 STORAGE_ACCOUNT="datacenterst32222"
 CONTAINER_NAME="datacenter-blob-8567"
 
@@ -119,12 +115,11 @@ az storage container show \
 #### 4. Equivalent Azure PowerShell implementation
 
 ```powershell file="create-public-blob-container.ps1"
-$ResourceGroup = "rg-storage-lab"
+# Remplacer par le nom du groupe de ressources fourni dans le laboratoire
+$ResourceGroup = "<RESOURCE_GROUP_NAME>"
 $Location = "eastus"
 $StorageAccount = "datacenterst32222"
 $ContainerName = "datacenter-blob-8567"
-
-New-AzResourceGroup -Name $ResourceGroup -Location $Location
 
 $storage = New-AzStorageAccount `
   -ResourceGroupName $ResourceGroup `
@@ -143,7 +138,7 @@ New-AzStorageContainer `
 #### 5. Validate the configuration with PowerShell
 
 ```powershell file="validate-public-blob-container.ps1"
-$ResourceGroup = "rg-storage-lab"
+$ResourceGroup = "<RESOURCE_GROUP_NAME>"
 $StorageAccount = "datacenterst32222"
 $ContainerName = "datacenter-blob-8567"
 
