@@ -4,7 +4,7 @@ slug: azure-blob-container-public-access-remediation-to-private
 pubDatetime: 2026-08-27T00:00:00Z
 description: "Cet article présente la remédiation rapide d’un conteneur Blob Azure exposé publiquement en rétablissant un accès strictement privé au niveau du conteneur."
 featured: false
-draft: true
+draft: false
 tags: ["Azure", "Cloud", "Azure Blob Storage", "Azure CLI"]
 ---
 
