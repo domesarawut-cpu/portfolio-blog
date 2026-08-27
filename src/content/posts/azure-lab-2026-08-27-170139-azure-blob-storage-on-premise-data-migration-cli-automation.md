@@ -4,7 +4,7 @@ slug: azure-blob-storage-on-premise-data-migration-cli-automation
 pubDatetime: 2026-08-27T00:00:00Z
 description: "Cette procédure présente une migration simple et scriptable d’un fichier local vers un conteneur Azure Blob Storage pour standardiser les transferts de données."
 featured: false
-draft: true
+draft: false
 tags: ["Azure", "Cloud", "Blob Storage", "Azure CLI"]
 ---
 
@@ -35,7 +35,7 @@ The migration path was intentionally kept minimal and headless:
 
 This topology supports a lightweight but production-aligned pattern for repeatable data transfer tasks. For a single-file upload, the command-line method is sufficient and easier to operationalize in CI/CD pipelines, automation jobs, or administrative runbooks.
 
-![Azure Configuration](@/assets/images/azure-task-20260827-170124.webp)
+![Azure Configuration](@/assets/images/azure-task-20260827-170124-azure-blob-storage-on-premise-data-migration-cli-automation.webp)
 
 > [!INFO] **Architectural Insight**  
 > GUI uploads are acceptable for one-off administrative tasks, but enterprise-scale data migrations should prefer **Azure CLI**, **Azure PowerShell**, or **AzCopy** for scriptability, high-throughput parallel processing, retry behavior, and better resilience across unstable networks.
