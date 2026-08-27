@@ -4,7 +4,7 @@ slug: azure-blob-container-public-access-remediation-to-private
 pubDatetime: 2026-08-27T00:00:00Z
 description: "Cet article présente la remédiation rapide d’un conteneur Blob Azure exposé publiquement en rétablissant un accès strictement privé au niveau du conteneur."
 featured: false
-draft: true
+draft: false
 tags: ["Azure", "Cloud", "Azure Blob Storage", "Azure CLI"]
 ---
 
@@ -39,10 +39,11 @@ The remediation was performed at the **container level** inside an existing Azur
 
 This was a focused **headless / CLI-friendly** security operation designed for repeatability and automation. The objective was to remove anonymous public read access only from the affected blob container.
 
-![Azure Configuration](@/assets/images/azure-task-20260827-173519.webp)
+![Azure Configuration](@/assets/images/azure-task-20260827-173519-azure-blob-container-public-access-remediation-to-private.webp)
 
 > [!INFO]
-> **Architectural Insight:** Fixing access at the container level addresses the immediate vulnerability in a **tactical** manner. A broader **strategic** control would also review storage account public access settings, Azure Policy enforcement, and preventive governance to reduce recurrence.
+> **Architectural Insight — Tactical vs. Strategic Remediation:**
+> Fixing access at the individual container level successfully addresses the immediate vulnerability (**Tactical Remediation**). However, it leaves the door open for human error on future containers. The absolute enterprise best practice (**Strategic Governance**) is to explicitly disable **'Blob anonymous access'** at the entire Storage Account level, or proactively enforce it using **Azure Policy** (e.g., *"Storage account public access should be disallowed"*). This establishes a hard security boundary and prevents future configuration drift.
 
 ### Action
 
