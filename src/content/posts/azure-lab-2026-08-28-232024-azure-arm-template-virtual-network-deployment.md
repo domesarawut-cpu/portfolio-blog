@@ -44,7 +44,7 @@ The deployment is executed headlessly through **Azure CLI**, utilizing a JSON AR
 ### Action
 The implementation consisted of locating the existing ARM template in `/root/arm-templates/vnet-deployment-template.json`, modifying its configuration to match the required network space and corporate tags, and executing the deployment via **Azure CLI**.
 
-A concise and production-friendly pattern is to keep the ARM template parameterized so the same file can be reused across environments with minimal changes.
+To complete this effectively within the lab environment, the JSON structure was directly modified using the `vi` text editor to reflect the new target state.
 
 ![Azure Configuration](@/assets/images/2026-08-28-azure-arm-template-virtual-network-deployment-vi.webp)
 
