@@ -38,8 +38,6 @@ The target architecture is intentionally simple and focused on network standardi
 
 The deployment is executed headlessly through **Azure CLI**, utilizing a JSON ARM template updated via terminal text editors (**vi**). This approach makes the network configuration deterministic and suitable for source control and change reviews.
 
-![Azure Configuration](@/assets/images/azure-task-20260828-232008-azure-arm-template-virtual-network-deployment.webp)
-
 > [!INFO]
 > **Architectural Insight:** Declarative IaC such as ARM, Bicep, or Terraform is superior to imperative GUI/CLI creation because the desired end state is explicitly documented in code. This improves state tracking, enables peer review through pull requests, and reduces configuration drift by ensuring environments are rebuilt from the same reviewed definition instead of relying on manual operator actions.
 
@@ -47,6 +45,8 @@ The deployment is executed headlessly through **Azure CLI**, utilizing a JSON AR
 The implementation consisted of locating the existing ARM template in `/root/arm-templates/vnet-deployment-template.json`, modifying its configuration to match the required network space and corporate tags, and executing the deployment via **Azure CLI**.
 
 A concise and production-friendly pattern is to keep the ARM template parameterized so the same file can be reused across environments with minimal changes.
+
+![Azure Configuration](@/assets/images/2026-08-28-azure-arm-template-virtual-network-deployment-vi.webp)
 
 #### 1. Modified ARM Template
 ```json file="vnet-deployment-template.json"
@@ -83,6 +83,8 @@ A concise and production-friendly pattern is to keep the ARM template parameteri
 #### 2. Resource Group Discovery and Deployment
 First, locate the target resource group matching the lab criteria using a filtered query:
 
+![Azure Configuration](@/assets/images/azure-task-20260828-232008-azure-arm-template-virtual-network-deployment.webp)
+
 ```bash file="deploy-vnet.sh"
 #!/usr/bin/env bash
 set -euo pipefail
@@ -107,6 +109,7 @@ az network vnet list \
   --query "[].{Name: name, AddressSpace: addressSpace.addressPrefixes, Tags: tags}" \
   --output yaml
 ```
+![Azure Configuration](@/assets/images/2026-08-28-azure-arm-template-virtual-network-deployment-verify.webp)
 
 > [!SUCCESS]
 > The deployment concluded with a `Succeeded` provisioning state. The VNet properties precisely match the governance requirements for CIDR and tagging standards.
