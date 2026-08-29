@@ -89,7 +89,7 @@ First, locate the target resource group matching the lab criteria using a filter
 #!/usr/bin/env bash
 set -euo pipefail
 
-RESOURCE_GROUP=az group list --query '[].name' --output table | grep 'kml'
+RESOURCE_GROUP=$(az group list --query '[].name' --output tsv | grep 'kml')
 
 az deployment group create \
   --resource-group "$RESOURCE_GROUP" \
