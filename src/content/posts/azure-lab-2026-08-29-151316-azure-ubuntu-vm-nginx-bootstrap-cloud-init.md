@@ -3,8 +3,8 @@ title: "Déployer une machine virtuelle Azure Ubuntu avec bootstrap Nginx via Po
 slug: azure-ubuntu-vm-nginx-bootstrap-portal-cli-cloud-init
 pubDatetime: 2026-08-29T00:00:00Z
 description: "Ce guide présente le déploiement d’une VM Azure Ubuntu avec installation automatique de Nginx via Cloud-Init, en utilisant à la fois le Portail Azure et Azure CLI."
-featured: false
-draft: true
+featured: true
+draft: false
 tags: ["Azure", "Cloud", "Azure CLI", "Cloud-Init"]
 ---
 
@@ -32,7 +32,7 @@ The target architecture is a single **Ubuntu-based Azure Virtual Machine** deplo
 
 From a connectivity perspective, Azure creates or associates the required virtual networking resources, and HTTP access is explicitly allowed through the attached **NSG rule**. The implementation supports both a **portal-based deployment** and a **headless CLI-driven workflow**, making it suitable for learning, validation, and progression toward Infrastructure as Code practices.
 
-![Azure Configuration](@/assets/images/azure-task-20260829-151259.webp)
+![Azure Configuration](@/assets/images/azure-task-20260829-151259-azure-ubuntu-vm-nginx-bootstrap-cloud-init.webp)
 
 > [!INFO]
 > This deployment pattern is intentionally simple and efficient. Azure CLI can implicitly create supporting resources during `az vm create` when no pre-existing network or resource dependencies are mandated.
@@ -61,7 +61,7 @@ The following YAML installs Nginx, ensures the package cache is updated, and sta
 
 ```yaml file="cloud-init.txt"
 #cloud-config
-package_update: true
+package_upgrade: true
 packages:
   - nginx
 
@@ -82,6 +82,7 @@ In the Azure Portal, the VM was created with these key settings:
 - **Image**: Ubuntu
 - **Inbound port**: HTTP (port 80)
 - **Custom Data**: contents of `cloud-init.txt`
+![Azure Configuration](@/assets/images/2026-08-29-azure-configuration-cloud-init.webp)
 
 Execution flow in the portal:
 
@@ -117,7 +118,8 @@ az vm create \
   --name devops-vm \
   --image Ubuntu2204 \
   --admin-username azureuser \
-  --generate-ssh-keys \
+  --authentication-type ssh \
+  --ssh-key-values ~/.ssh/id_rsa.pub \
   --custom-data cloud-init.txt
 ```
 
