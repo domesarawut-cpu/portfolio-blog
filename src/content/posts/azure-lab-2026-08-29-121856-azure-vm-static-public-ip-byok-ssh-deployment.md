@@ -4,8 +4,8 @@ slug: azure-vm-static-public-ip-byok-ssh-deployment-guide
 pubDatetime: 2026-08-29T00:00:00Z
 description: "Mise en œuvre d’une machine virtuelle Azure Ubuntu avec adresse IP publique statique et authentification SSH par clé fournie côté client."
 featured: false
-draft: true
-tags: ["Azure", "Cloud", "Virtual Machine", "SSH"]
+draft: false
+tags: ["Azure", "Cloud", "Virtual Machine", "SSH", "RSA"]
 ---
 
 ## Table of Contents
@@ -55,7 +55,7 @@ This deployment can be executed fully in **CLI/headless mode**, which makes it s
 
 Azure CLI supports efficient provisioning without over-engineering. The public IP can be created explicitly when static allocation is required, then attached during VM creation. The SSH public key is passed directly to the VM resource so that passwordless access is ready immediately after provisioning.
 
-![Azure Configuration](@/assets/images/azure-task-20260829-121839.webp)
+![Azure Configuration](@/assets/images/azure-task-20260829-121839-azure-vm-static-public-ip-byok-ssh-deployment.webp)
 
 > [!INFO]
 > A static public IP is useful when you need consistent remote access, firewall allowlisting, or predictable DNS mapping.
@@ -90,16 +90,19 @@ This workflow reflects a practical transition from GUI-based provisioning to a m
 #### 1) Generate the SSH key pair locally
 
 ```bash file="generate-ssh-key.sh"
-ssh-keygen -t rsa -b 4096 -f ~/.ssh/datacenter_azure_rsa -C "azure-admin-key"
+ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -N ""
 ```
 
 This creates:
 
-- private key: `~/.ssh/datacenter_azure_rsa`
-- public key: `~/.ssh/datacenter_azure_rsa.pub`
+- private key: `~/.ssh/id_rsa`
+- public key: `~/.ssh/id_rsa.pub`
+
+![Azure Configuration](@/assets/images/2026-08-29-ssh-keygen-file.webp)
+As shown below, the ssh-keygen utility automatically applies the strict security permissions required for SSH keys (600 for the private key, 644 for the public key), eliminating the need for manual chmod adjustments.
 
 > [!SUCCESS]
-> Generating keys locally ensures the private key remains under operator control from creation to usage.
+> Generating keys locally ensures the private key remains under operator control from creation to usage, with strict file-level access controls enforced by the OS.
 
 #### 2) Create the static public IP
 
@@ -126,7 +129,7 @@ az vm create \
   --admin-username azureuser \
   --public-ip-address datacenter-pip \
   --authentication-type ssh \
-  --ssh-key-values ~/.ssh/datacenter_azure_rsa.pub
+  --ssh-key-values ~/.ssh/id_rsa.pub
 ```
 
 This command provisions the VM and attaches:
@@ -155,8 +158,9 @@ az vm show \
 Then connect using the private key:
 
 ```bash file="connect-vm.sh"
-ssh -i ~/.ssh/datacenter_azure_rsa azureuser@<PUBLIC_IP>
+ssh -i ~/.ssh/id_rsa azureuser@<PUBLIC_IP>
 ```
+![Azure Configuration](@/assets/images/2026-08-29-ssh-key-rsa-connect-to-vm.webp)
 
 #### 5) Validation
 
