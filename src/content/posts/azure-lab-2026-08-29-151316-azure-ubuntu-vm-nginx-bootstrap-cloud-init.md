@@ -69,7 +69,18 @@ runcmd:
   - systemctl enable nginx
   - systemctl start nginx
 ```
-
+Using cat commande to create yaml file cloud-init.txt
+```yaml file="cloud-init.txt"
+cat <<EOF > cloud-init.txt
+#cloud-config
+package_upgrade: true
+packages:
+  - nginx
+runcmd:
+  - systemctl enable nginx
+  - systemctl start nginx
+EOF
+```
 > [!NOTE]
 > Save the file exactly as `cloud-init.txt` before using it in Azure Portal Custom Data or the `--custom-data` CLI parameter.
 
@@ -109,17 +120,25 @@ az group create \
   --name rg-devops-vm \
   --location eastus
 ```
+OR 
+Identify your target resource group:
+```bash file="get-resource-group.sh"
+RESOURCE_GROUP=$(az group list --query '[].name' --output tsv)
+```
 
 Then create the VM with Cloud-Init:
 
 ```bash file="create-vm.sh"
 az vm create \
-  --resource-group rg-devops-vm \
+  --resource-group "$RESOURCE_GROUP" \
   --name devops-vm \
+  --location eastus \
+  --size Standard_B1s \
   --image Ubuntu2204 \
   --admin-username azureuser \
   --authentication-type ssh \
   --ssh-key-values ~/.ssh/id_rsa.pub \
+  --storage-sku Standard_LRS \
   --custom-data cloud-init.txt
 ```
 
@@ -127,7 +146,7 @@ Open HTTP traffic on port 80:
 
 ```bash file="open-http-port.sh"
 az vm open-port \
-  --resource-group rg-devops-vm \
+  --resource-group "$RESOURCE_GROUP" \
   --name devops-vm \
   --port 80
 ```
