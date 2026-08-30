@@ -69,7 +69,7 @@ runcmd:
   - systemctl enable nginx
   - systemctl start nginx
 ```
-Using cat commande to create yaml file cloud-init.txt
+Using `cat` commande to create yaml file `cloud-init.txt`
 ```yaml file="cloud-init.txt"
 cat <<EOF > cloud-init.txt
 #cloud-config
