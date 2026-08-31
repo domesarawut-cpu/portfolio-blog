@@ -120,6 +120,11 @@ az network public-ip create \
 This explicitly provisions a reusable static public IP resource before the VM is created.
 
 #### 3) Create the VM and inject the local public key
+> [!NOTE]
+> Use this command to list an existing resource group, in case need to create a resource inside an existing group.
+>  ```bash file="list-RG.sh"
+>  az group list --query '[].name' --output tsv
+>  ```
 
 ```bash file="create-vm.sh"
 az vm create \
@@ -139,12 +144,6 @@ This command provisions the VM and attaches:
 - the client-generated SSH public key for passwordless login.
 
 Azure CLI can implicitly create dependent resources such as NIC, VNet, subnet, and NSG when not explicitly defined, keeping the deployment concise and idiomatic.
-
-> [!NOTE]
-> Use this command to list an existing resource group, in case need to create a resource inside an existing group.
->  ```bash file="list-RG.sh"
->  az group list --query '[].name' --output tsv
->  ```
 
 > [!NOTE]
 > This is a good example of using Azure CLI native defaults efficiently instead of manually creating every dependent resource without a business need.
