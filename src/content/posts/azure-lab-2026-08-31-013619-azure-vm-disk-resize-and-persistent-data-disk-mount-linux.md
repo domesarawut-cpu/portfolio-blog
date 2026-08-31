@@ -4,8 +4,8 @@ slug: azure-vm-disk-resize-and-persistent-data-disk-mount-linux
 pubDatetime: 2026-08-31T00:00:00Z
 description: "Mise en œuvre du redimensionnement du disque OS et de l’ajout d’un disque de données avec montage persistant sur une machine virtuelle Azure Linux."
 featured: false
-draft: true
-tags: ["Azure", "Cloud", "Linux", "Storage"]
+draft: false
+tags: ["Azure", "Cloud", "Linux", "Azure Storage", "Virtual Machine"]
 ---
 
 ## Table of Contents
@@ -65,16 +65,19 @@ The implementation followed a simple and reliable Linux administration workflow 
 6. **Persist the mount in `/etc/fstab`**
 7. **Validate the configuration**
 
-Example command flow:
+As shown in the terminal execution below, attempting to format the temporary disk (`/dev/sdc`) fails safely because the system correctly identifies it as being in use. The `lsblk` output guided the dynamic selection of `/dev/sda` for the new data volume.
+
+![Disk Formatting and Persistent Mount Execution](@/assets/images/2026-08-31-disk-persistent-mount-vm-linux.webp)
+
+Command execution sequence corresponding to the terminal output:
 
 ```bash file="disk-validation-and-mount.sh"
 lsblk
 sudo mkfs.ext4 /dev/sda
 sudo mkdir -p /mnt/xfusion-disk
 sudo mount /dev/sda /mnt/xfusion-disk
-sudo sh -c 'echo "/dev/sda /mnt/xfusion-disk ext4 defaults,nofail 0 2" >> /etc/fstab'
-sudo mount -a
-lsblk
+echo '/dev/sda /mnt/xfusion-disk ext4 defaults,nofail 0 2' | sudo tee -a /etc/fstab
+df -h
 ```
 
 Command purpose summary:
