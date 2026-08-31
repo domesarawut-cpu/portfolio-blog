@@ -87,6 +87,8 @@ The implementation followed a clean CLI-driven workflow:
 
 This workflow reflects a practical transition from GUI-based provisioning to a more auditable and repeatable **command-line deployment model**.
 
+![Azure Configuration](@/assets/images/2026-08-29-inject-ssh-key-publi-to-vm.webp)
+
 #### 1) Generate the SSH key pair locally
 
 ```bash file="generate-ssh-key.sh"
@@ -131,13 +133,18 @@ az vm create \
   --authentication-type ssh \
   --ssh-key-values ~/.ssh/id_rsa.pub
 ```
-
 This command provisions the VM and attaches:
 
 - the existing static public IP `datacenter-pip`;
 - the client-generated SSH public key for passwordless login.
 
 Azure CLI can implicitly create dependent resources such as NIC, VNet, subnet, and NSG when not explicitly defined, keeping the deployment concise and idiomatic.
+
+> [!NOTE]
+> Use this command to list an existing resource group, in case need to create a resource inside an existing group.
+>  ```bash file="list-RG.sh"
+>  az group list --query '[].name' --output tsv
+>  ```
 
 > [!NOTE]
 > This is a good example of using Azure CLI native defaults efficiently instead of manually creating every dependent resource without a business need.
