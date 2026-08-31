@@ -86,8 +86,8 @@ Command purpose summary:
 - `mkfs.ext4`: creates the filesystem on the new data disk
 - `mkdir -p`: creates the persistent mount directory
 - `mount`: mounts the disk immediately without reboot
-- `/etc/fstab`: ensures the mount survives reboots
-- `mount -a`: tests the `fstab` configuration without needing a restart
+- `echo ... | sudo tee -a /etc/fstab`: safely appends the persistent mount entry, ensuring it survives reboots
+- `df -h`: validates the active mount points and capacity
 
 A more explicit inspection step can also be used before formatting:
 
@@ -102,7 +102,7 @@ Example persistent mount entry:
 ```
 
 > [!SUCCESS]
-> Using `mount -a` after updating `/etc/fstab` is the fastest safe validation step to catch syntax or device-reference errors before a reboot.
+> Utilizing `echo` combined with `sudo tee -a` is a highly reliable pattern for appending configurations to protected system files like `/etc/fstab` without requiring interactive text editors, making it ideal for automation scripts.
 
 > [!NOTE]
-> This workflow reflects a practical transition from portal-based infrastructure changes to repeatable operational procedures executed through CLI and standard Linux system administration. In a larger environment, the same pattern can be codified further with IaC and configuration management tools for consistency at scale.
+> This workflow reflects a practical transition from portal-based infrastructure changes to repeatable operational procedures executed through CLI and standard Linux system administration. In a larger environment, this exact pattern can be codified further into Cloud-Init or configuration management tools (Ansible) for consistency at scale.
