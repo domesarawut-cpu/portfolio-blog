@@ -4,8 +4,8 @@ slug: deploy-public-azure-vnet-subnet-vm-ubuntu-ssh
 pubDatetime: 2026-09-01T00:00:00Z
 description: "Mise en place d’une fondation réseau publique sur Azure avec un VNet, un sous-réseau et une VM Ubuntu accessible en SSH."
 featured: false
-draft: true
-tags: ["Azure", "Cloud", "Virtual Network", "Ubuntu"]
+draft: false
+tags: ["Azure", "Cloud", "Virtual Network", "Subnet", "Azure CLI"]
 ---
 
 ## Table of Contents
@@ -42,83 +42,32 @@ The deployment was implemented in **East US** as a simple public-facing Azure ne
 
 - **Virtual Network:** `xfusion-pub-vnet`
 - **Subnet:** `xfusion-pub-subnet`
-- **Virtual Machine:** `xfusion-pub-vm`
-- **Operating System:** Ubuntu
-- **Inbound Access:** TCP/22 for SSH
-- **Public Connectivity:** Dedicated Azure Public IP bound to the VM network path
+- **Virtual Machine:** `xfusion-pub-vm` (Ubuntu)
+- **Inbound Access:** TCP/22 for SSH via NSG
+- **Public Connectivity:** Dedicated Azure Public IP bound to the VM's Network Interface
 
-This is a standard entry-level Azure infrastructure pattern for administrative access and validation workloads. The VM was attached to the target subnet and exposed through a public IP, with network security rules allowing SSH ingress.
-
-![Azure Configuration](@/assets/images/azure-task-20260901-010601.webp)
+![Azure VNet Configuration](@/assets/images/2026-09-01-deploy-vnet-public.webp)
 
 > [!INFO]
-> **Architectural Insight**: Unlike AWS, where "auto-assign public IP" is a subnet-level toggle, Azure explicitly attaches Public IP resources directly to the Virtual Machine's Network Interface (NIC). This means public exposure is modeled as an explicit resource association rather than inherited subnet behavior.
-
-The equivalent headless deployment can be performed using Azure CLI. A minimal and clean implementation is shown below.
-
-```bash file="deploy-network-foundation.sh"
-#!/usr/bin/env bash
-
-RESOURCE_GROUP="rg-xfusion-network"
-LOCATION="eastus"
-VNET_NAME="xfusion-pub-vnet"
-SUBNET_NAME="xfusion-pub-subnet"
-VM_NAME="xfusion-pub-vm"
-ADMIN_USER="azureuser"
-
-az group create \
-  --name "$RESOURCE_GROUP" \
-  --location "$LOCATION"
-
-az network vnet create \
-  --resource-group "$RESOURCE_GROUP" \
-  --name "$VNET_NAME" \
-  --location "$LOCATION" \
-  --subnet-name "$SUBNET_NAME"
-
-az vm create \
-  --resource-group "$RESOURCE_GROUP" \
-  --name "$VM_NAME" \
-  --location "$LOCATION" \
-  --image Ubuntu2204 \
-  --admin-username "$ADMIN_USER" \
-  --generate-ssh-keys \
-  --vnet-name "$VNET_NAME" \
-  --subnet "$SUBNET_NAME" \
-  --public-ip-sku Standard
-
-az vm open-port \
-  --resource-group "$RESOURCE_GROUP" \
-  --name "$VM_NAME" \
-  --port 22
-```
-
-> [!NOTE]
-> The script intentionally keeps the deployment concise and relies on native Azure CLI defaults where appropriate, avoiding unnecessary over-engineering for a foundational lab topology.
+> **Architectural Insight:** Unlike AWS, where "auto-assign public IP" is a subnet-level configuration toggle, Azure explicitly requires attaching a Public IP resource directly to the Virtual Machine's Network Interface (NIC). Public exposure in Azure is modeled as an explicit resource association rather than an inherited subnet behavior.
 
 ### Action
 
-The environment was initially provisioned through the **Azure Portal**, following these implementation steps:
+The environment was successfully provisioned through the **Azure Portal**, serving as a validation baseline before transitioning to automated provisioning. 
 
-1. Created the target resource container in **East US**
-2. Provisioned the virtual network `xfusion-pub-vnet`
-3. Defined the subnet `xfusion-pub-subnet` within the VNet
-4. Deployed the Ubuntu virtual machine `xfusion-pub-vm`
-5. Attached the VM to the previously created subnet
-6. Assigned a dedicated Public IP for external access
-7. Enabled inbound SSH access on **port 22**
+#### 1. Portal-Based Deployment & Network Security
+The deployment flow involved defining the VNet, mapping the subnet, and attaching a standard Public IP to the compute instance. A critical step was ensuring the Network Security Group (NSG) allowed inbound SSH connectivity to the public endpoint.
 
-To transition from GUI-based provisioning to repeatable CLI execution, the deployment maps cleanly to two primary resource creation commands:
+![VM Network Settings and NSG](@/assets/images/2026-09-01-deploy-vm-assigned-ippub-subnet-nsg.webp)
 
-- `az network vnet create` for the VNet and subnet
-- `az vm create` for the VM, NIC, and public access path
+#### 2. Azure CLI Equivalent (Infrastructure as Code)
+To transition from GUI-based provisioning to a repeatable headless execution, the deployment maps cleanly to the following Azure CLI commands. This pattern utilizes the existing local SSH key (BYOK) for secure authentication.
 
-A more explicit variant is shown below for teams that want readable parameter control while still staying lightweight.
-
-```bash file="azure-cli-equivalent-commands.sh"
-RESOURCE_GROUP="rg-xfusion-network"
+```bash file="deploy-network-foundation.sh"
+RESOURCE_GROUP="kml_rg_main-e21b302b8ac34206"
 LOCATION="eastus"
 
+# 1. Create the Virtual Network and Subnet
 az network vnet create \
   --resource-group "$RESOURCE_GROUP" \
   --location "$LOCATION" \
@@ -127,23 +76,22 @@ az network vnet create \
   --subnet-name "xfusion-pub-subnet" \
   --subnet-prefixes "10.0.1.0/24"
 
+# 2. Deploy the VM, assign a Public IP, and inject the local SSH key
 az vm create \
   --resource-group "$RESOURCE_GROUP" \
   --location "$LOCATION" \
   --name "xfusion-pub-vm" \
   --image "Ubuntu2204" \
   --admin-username "azureuser" \
-  --generate-ssh-keys \
+  --authentication-type "ssh" \
+  --ssh-key-values ~/.ssh/id_rsa.pub \
   --vnet-name "xfusion-pub-vnet" \
   --subnet "xfusion-pub-subnet" \
   --public-ip-sku "Standard"
-```
 
-To allow SSH after VM creation:
-
-```bash file="open-ssh-port.sh"
+# 3. Explicitly allow SSH inbound traffic
 az vm open-port \
-  --resource-group "rg-xfusion-network" \
+  --resource-group "$RESOURCE_GROUP" \
   --name "xfusion-pub-vm" \
   --port 22
 ```
@@ -151,20 +99,25 @@ az vm open-port \
 > [!WARNING]
 > Opening SSH to the internet is acceptable for lab validation, but production environments should restrict source IP ranges, use Just-in-Time access, Azure Bastion, or private administration paths wherever possible.
 
-Post-deployment validation can be performed with standard CLI inspection:
+#### 3. Connectivity Validation
+The final validation confirms both Inbound access (SSH) and Outbound internet connectivity (ICMP/Ping).
 
 ```bash file="validate-deployment.sh"
 az vm show \
-  --resource-group "rg-xfusion-network" \
+  --resource-group "kml_rg_main-e21b302b8ac34206" \
   --name "xfusion-pub-vm" \
   --show-details \
   --output table
 
 az network vnet show \
-  --resource-group "rg-xfusion-network" \
+  --resource-group "kml_rg_main-e21b302b8ac34206" \
   --name "xfusion-pub-vnet" \
   --output table
 ```
+![VM Network Settings and NSG](@/assets/images/2026-09-01-ssh-key-to-vm-via-public-outbround-internet.webp)
 
 > [!SUCCESS]
-> The resulting topology delivers a reusable public network foundation that can be extended with additional subnets, private workloads, NSG hardening, or future Infrastructure as Code patterns such as Bicep or Terraform.
+> Architectural Insight: The successful ping google.com validates outbound connectivity. In Azure, when a VM is explicitly assigned a Public IP, the Azure infrastructure automatically provides Implicit SNAT (Source Network Address Translation) through that IP, allowing the VM to reach the internet without requiring a separate NAT Gateway.
+
+> [!NOTE]
+> The resulting topology delivers a reusable public network foundation that can be extended with additional subnets, private workloads, NSG hardening, or converted into full IaC (Bicep/Terraform) templates.
