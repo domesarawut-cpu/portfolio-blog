@@ -4,7 +4,7 @@ slug: provision-private-azure-vnet-vm-without-public-ip
 pubDatetime: 2026-09-01T00:00:00Z
 description: "Déploiement d’un réseau virtuel Azure isolé et d’une machine virtuelle privée protégée par un groupe de sécurité réseau restrictif."
 featured: false
-draft: true
+draft: false
 tags: ["Azure", "Cloud", "Virtual Network", "Network Security Group"]
 ---
 
@@ -30,21 +30,18 @@ La validation fonctionnelle a confirmé que la machine virtuelle n’était pas 
 
 ### Topology
 
-The solution was deployed in **Central US** using a private-only network design:
+The solution was deployed in **Central US** using a private-only network design, enforcing complete isolation from the public internet:
 
-- **Virtual Network:** `datacenter-priv-vnet`
-- **Address Space:** `10.0.0.0/16`
-- **Virtual Machine:** `datacenter-priv-vm`
+- **Virtual Network:** `datacenter-priv-vnet` (Address Space: `10.0.0.0/16`)
+- **Subnet:** `datacenter-priv-subnet` (Address Space: `10.0.0.0/24`)
+- **Virtual Machine:** `datacenter-priv-vm` (No Public IP)
 - **Public Exposure:** None
-- **Security Control:** `datacenter-priv-nsg`
-- **Inbound Rule:** Allow SSH (`TCP/22`) only from `10.0.0.0/16` to `10.0.0.0/16`
+- **Security Control:** `datacenter-priv-nsg` (Attached at the Subnet level)
+- **Inbound Rule:** Allow SSH (`TCP/22`) exclusively from `10.0.0.0/16` to `10.0.0.0/16`
 
 This is a classic **headless/CLI-friendly backend pattern** where the VM is intentionally not exposed to the public Internet. Instead of assigning a public endpoint, connectivity is expected to traverse controlled internal paths.
 
-![Azure Configuration](@/assets/images/azure-task-20260901-192455.webp)
-
-> [!INFO]
-> The VM was created with `--public-ip-address ""`, which explicitly prevents Azure CLI from attaching a Public IP resource during provisioning.
+![Azure VNet Address Space](@/assets/images/2026-09-01-create-vnet-private.webp)
 
 > [!NOTE]
 > Azure CLI can implicitly create dependent resources when appropriate, but in this lab the VNet, NSG, and NSG rule were created explicitly to enforce a clear and auditable private-network design.
@@ -55,58 +52,48 @@ This deployment reflects a **zero-trust backend architecture**. Virtual machines
 
 A more secure enterprise pattern is:
 
-- keep backend VMs **private-only**
-- restrict east-west and north-south traffic with **NSGs**
-- route administration through a **Jumpbox** or **Azure Bastion**
-- optionally integrate with **VPN** or **ExpressRoute** for private corporate access
+1. Backend VMs remain **private-only**.
+2. Network Security Groups (NSGs) are attached at the **Subnet level** (rather than per-NIC) to enforce consistent security policies across all resources within that segment.
+3. Administration is routed through a **Jumpbox**, **Azure Bastion**, or an **ExpressRoute/VPN** connection.
 
 In practice, administrators first connect to a controlled entry point inside the VNet, then access the backend VM over private IP space. This preserves manageability while enforcing strong network isolation.
 
 ### Action
 
-The implementation combined **Azure Portal validation** and **Azure CLI execution**, with the CLI serving as the reproducible deployment method.
+The implementation was first validated through the **Azure Portal** to confirm the state of the resources, followed by mapping the deployment to **Azure CLI** for repeatability.
 
 #### Azure Portal Steps
 
-1. Created a new **Virtual Network** named `datacenter-priv-vnet` in **Central US**
-2. Configured the address space as `10.0.0.0/16`
-3. Created a **Network Security Group** named `datacenter-priv-nsg`
-4. Added an inbound rule allowing:
-   - **Source:** `10.0.0.0/16`
-   - **Source Port Ranges:** `*`
-   - **Destination:** `10.0.0.0/16`
-   - **Destination Port Ranges:** `22`
-   - **Protocol:** `TCP`
-   - **Action:** `Allow`
-5. Deployed the VM `datacenter-priv-vm` into the VNet
-6. Confirmed the VM was provisioned **without a Public IP**
+The network foundation was established by creating the VNet and defining the Subnet. Crucially, the NSG was associated directly with the Subnet. This ensures that any VM deployed into this Subnet automatically inherits the restrictive SSH rules without requiring individual NIC configuration.
+
+![Azure Subnet and NSG Association](@/assets/images/2026-09-01-nsg-private-assciation-subnet.webp)
+
+Subsequently, the Virtual Machine was provisioned. The configuration explicitly omitted a Public IP address. The resulting state confirms the VM only holds a private IP (`10.0.0.4`) and relies entirely on internal VNet routing.
+
+![Azure VM Private Interface Configuration](@/assets/images/azure-task-20260901-192455-vm-interface-internal-private.webp)
 
 > [!WARNING]
-> Allowing SSH from the full VNet CIDR is acceptable for a controlled lab or segmented backend zone, but production environments should narrow administrative access further through dedicated management subnets, Bastion, or privileged access paths.
+> Allowing SSH from the full VNet CIDR is acceptable for a segmented backend zone, but strict production environments should narrow administrative access further to specific management subnets or Bastion IP ranges.
 
-#### Azure CLI Commands
+#### Infrastructure as Code (Azure CLI) Commands
 
-```bash file="azure-private-vnet-create.sh"
-az network vnet create \
-  --resource-group myResourceGroup \
-  --name datacenter-priv-vnet \
-  --location centralus \
-  --address-prefix 10.0.0.0/16
-```
+To move from portal-driven provisioning to a repeatable headless deployment, the following Azure CLI script recreates the exact architecture demonstrated above. It explicitly handles Subnet-level NSG attachment and ensures the VM is deployed without a public endpoint (`--public-ip-address ""`).
 
-```bash file="azure-private-nsg-create.sh"
+```bash file="deploy-private-backend.sh"
+RESOURCE_GROUP=$(az group list --query '[].name' --output tsv)
+LOCATION="centralus"
+
+# 1. Create the NSG and define the restrictive internal SSH rule
 az network nsg create \
-  --resource-group myResourceGroup \
+  --resource-group "$RESOURCE_GROUP" \
   --name datacenter-priv-nsg \
-  --location centralus
-```
+  --location "$LOCATION"
 
-```bash file="azure-private-nsg-rule-create.sh"
 az network nsg rule create \
-  --resource-group myResourceGroup \
+  --resource-group "$RESOURCE_GROUP" \
   --nsg-name datacenter-priv-nsg \
-  --name allow-ssh-from-vnet \
-  --priority 1000 \
+  --name allow-ssh-internal \
+  --priority 100 \
   --direction Inbound \
   --access Allow \
   --protocol Tcp \
@@ -114,18 +101,32 @@ az network nsg rule create \
   --source-port-ranges '*' \
   --destination-address-prefixes 10.0.0.0/16 \
   --destination-port-ranges 22
-```
 
-```bash file="azure-private-vm-create.sh"
+# 2. Create the VNet and Subnet, attaching the NSG at the Subnet level
+az network vnet create \
+  --resource-group "$RESOURCE_GROUP" \
+  --name datacenter-priv-vnet \
+  --location "$LOCATION" \
+  --address-prefixes 10.0.0.0/16 \
+  --subnet-name datacenter-priv-subnet \
+  --subnet-prefixes 10.0.0.0/24 \
+  --network-security-group datacenter-priv-nsg
+
+# 3. Deploy the Virtual Machine explicitly WITHOUT a Public IP
 az vm create \
-  --resource-group myResourceGroup \
+  --resource-group "$RESOURCE_GROUP" \
   --name datacenter-priv-vm \
-  --location centralus \
+  --location "$LOCATION" \
   --image Ubuntu2204 \
+  --admin-username azureuser \
+  --authentication-type ssh \
+  --ssh-key-values ~/.ssh/id_rsa.pub \
   --vnet-name datacenter-priv-vnet \
-  --nsg datacenter-priv-nsg \
+  --subnet datacenter-priv-subnet \
   --public-ip-address ""
 ```
+> [!NOTE]
+By passing the empty string "" to the --public-ip-address parameter, we override Azure CLI's default behavior of automatically generating a public IP for new VMs, ensuring strict adherence to the private-only design.
 
 #### IaC and Operational Mindset
 
