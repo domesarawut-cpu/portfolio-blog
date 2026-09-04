@@ -105,6 +105,7 @@ systemctl status nginx
 The final step validated the entire stack (Routing -> NSG -> NIC -> OS -> Nginx) by accessing the VM's public IP via a standard web browser.
 ![Nginx Running](@/assets/images/2026-09-04-nginx-running-port80-accessible.webp)
 
+#### IaC Equivalent Azure CLI
 > [!INFO]
 > IaC Equivalent: While this troubleshooting was performed via the Portal for immediate visual validation, the infrastructure fixes map directly to Azure CLI commands:
 
