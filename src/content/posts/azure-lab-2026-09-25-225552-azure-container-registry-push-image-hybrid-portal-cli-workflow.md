@@ -3,8 +3,8 @@ title: "Provisionner Azure Container Registry et publier une image conteneur via
 slug: azure-container-registry-push-image-hybrid-portal-cli-workflow
 pubDatetime: 2026-09-26T00:00:00Z
 description: "Mise en place d’un registre Azure Container Registry en portail puis déploiement d’une image Docker via Azure CLI dans une approche hybride simple et reproductible."
-featured: false
-draft: true
+featured: true
+draft: false
 tags: ["Azure", "Cloud", "ACR", "Docker"]
 ---
 
@@ -27,54 +27,50 @@ Le registre Azure Container Registry a été créé avec succès, puis utilisé 
 
 La valeur délivrée est double : d’une part, une base prête pour industrialiser des déploiements conteneurisés sécurisés dans Azure ; d’autre part, une démonstration concrète d’un modèle hybride pragmatique permettant de passer progressivement d’actions manuelles vers des pratiques plus automatisées et reproductibles.
 
-> [!SUCCESS]
-> Résultat validé : registre privé opérationnel, image `latest` publiée avec succès dans Azure Container Registry.
-
 ## Technical Implementation
 
 ### Topology
 
-The implementation used a hybrid operating model:
+The implementation used a hybrid operating model separating infrastructure deployment from application lifecycle management:
 
 - **Infrastructure provisioning:** Azure Portal
 - **Registry authentication and image publishing:** Azure CLI + Docker CLI
 - **Region:** East US
 - **Registry name:** `datacenteracr899172168`
 - **SKU:** Basic
-- **Image tag:** `latest`
+- **Image context:** `/root/pyapp`
 
-The architecture is intentionally lightweight. Azure Container Registry acts as the private image repository, while the container image is built on the local workstation and then pushed to Azure. This pattern is common for small teams, proof-of-concept deployments, and early-stage DevOps adoption before introducing full CI/CD automation.
+The architecture is intentionally lightweight. Azure Container Registry acts as the private image repository, while the container image is built on the local workstation and then pushed to Azure.
 
-![Azure Configuration](@/assets/images/azure-task-20260925-225529.webp)
-
-From a connectivity standpoint, the local machine authenticates against Azure, logs into the target ACR instance, tags the locally built image using the fully qualified registry login server, and uploads the image layers to the managed registry endpoint.
+![Azure Container Registry Overview](@/assets/images/azure-task-20260925-225529.webp)
 
 > [!NOTE]
-> This was a **hybrid workflow**: Portal for infrastructure creation, CLI for operational deployment steps.
+> This **hybrid workflow** (Portal for infrastructure creation, CLI for operational deployment) is a common pattern for proof-of-concept deployments and early-stage DevOps adoption before introducing full CI/CD automation.
 
 #### Architectural Insight
 
-The traditional approach used here relies on a **local Docker build**:
+The traditional approach used in this deployment relies on a **local Docker build**:
 
-- source code is built on the operator's machine
-- Docker daemon runs locally
-- the resulting image is tagged and pushed to ACR
+- source code is built on the operator's machine.
+- A local Docker daemon is required.
+- The resulting image is tagged and pushed over the network to ACR.
 
-This method is simple and effective, but it assumes the workstation has:
+While simple and effective for local development, it assumes the workstation has sufficient compute resources and a running Docker engine.
 
 - Docker installed and running
 - sufficient CPU, memory, and disk for image builds
 - network access to push image layers to Azure
 
-A more cloud-native alternative is **Azure ACR Tasks** using `az acr build`. In that model, the source context is sent to Azure and the image build runs in the cloud, directly inside the registry service workflow.
+A more cloud-native, enterprise-grade alternative is using **Azure ACR Tasks** (`az acr build`). In that model, the source context is sent directly to Azure, and the image build executes in the cloud.
 
 Benefits of `az acr build` include:
 
-- no dependency on a local Docker daemon
-- reduced local compute requirements
-- more consistent builds across environments
-- easier integration into CI/CD pipelines
-- simpler agent setup for automated pipelines
+- **No local Docker daemon required.**
+- Compute constraints are offloaded to Azure.
+- Highly consistent builds across environments, avoiding "it works on my machine" issues.
+- Seamless integration into CI/CD pipelines (e.g., GitHub Actions, Azure DevOps).
+
+For enterprise delivery pipelines, ACR Tasks generally provide a cleaner operational model, but local builds remain a vital skill for rapid inner-loop iteration and debugging.
 
 Example of the cloud-build model:
 
@@ -93,8 +89,9 @@ For enterprise delivery pipelines, ACR Tasks generally provide a cleaner operati
 ### Action
 
 The following steps were executed to complete the deployment workflow.
+The deployment workflow was executed through a combination of GUI provisioning and precise command-line operations.
 
-#### 1. Provision the Azure Container Registry in the Portal
+#### 1. Provision the Azure Container Registry (Portal)
 
 The Azure Container Registry instance was first created manually in the Azure Portal with these parameters:
 
@@ -109,40 +106,31 @@ This GUI-based creation step is often acceptable for isolated labs or initial va
 
 #### 2. Authenticate to Azure Container Registry
 
-After the registry was provisioned, the client authenticated to ACR using Azure CLI:
+After the registry was provisioned, operations shifted to the terminal. The following execution log demonstrates the end-to-end process of authenticating to Azure, building the container directly with its Fully Qualified Domain Name (FQDN) tag, and pushing it to the remote registry.
 
+![ACR Login, Docker Build, and Push Execution](@/assets/images/2026-09-25-acr-login-docker-build-push-execution.webp)
+
+The process maps to three precise commands:
 ```bash file="acr-login.sh"
 az acr login --name datacenteracr899172168
 ```
 
-This command configures Docker authentication against the Azure Container Registry login server associated with the target registry.
+This command seamlessly retrieves an authentication token using the active Azure CLI session and configures the local Docker daemon to access the private registry.
 
-#### 3. Build the container image locally
+#### 3. Build and Tag the Image
 
-The container image was built from the local application source code using Docker:
+Instead of building and tagging in two separate steps, the image was built and tagged simultaneously using the ACR login server address.
 
 ```bash file="docker-build.sh"
-docker build -t myapp:latest .
+docker build -t datacenteracr899172168.azurecr.io/datacenteracr899172168:latest /root/pyapp
 ```
 
-This step produced a local image tagged as `myapp:latest`.
+#### 4. Push to Azure Container Registry
 
-#### 4. Tag the image for Azure Container Registry
+The local image was then pushed to the managed registry in Azure.
 
-Before pushing, the local image was retagged to match the fully qualified ACR repository path:
-
-```bash file="docker-tag.sh"
-docker tag myapp:latest datacenteracr899172168.azurecr.io/myapp:latest
-```
-
-This naming convention is required so Docker knows the destination registry and repository.
-
-#### 5. Push the image to ACR
-
-The tagged image was then pushed to Azure Container Registry:
-
-```bash file="docker-push.sh"
-docker push datacenteracr899172168.azurecr.io/myapp:latest
+```bash file="push-to-azure.sh"
+docker push datacenteracr899172168.azurecr.io/datacenteracr899172168:latest
 ```
 
 Once the push completed, the image became available in the private registry for downstream deployment targets.
@@ -157,12 +145,5 @@ az acr repository list \
   --output table
 ```
 
-```bash file="acr-show-tags.sh"
-az acr repository show-tags \
-  --name datacenteracr899172168 \
-  --repository myapp \
-  --output table
-```
-
-> [!SUCCESS]
-> The successful push confirmed that registry provisioning, authentication, local build, image tagging, and remote publication all worked end to end.
+[!SUCCESS]
+The successful Pushed state of all image layers confirms that the registry provisioning, client authentication, and image publication were executed flawlessly.
