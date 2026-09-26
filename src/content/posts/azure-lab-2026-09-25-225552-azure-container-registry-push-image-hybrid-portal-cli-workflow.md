@@ -145,4 +145,4 @@ az acr repository list \
 ```
 
 > [!SUCCESS]
-> The successful Pushed state of all image layers confirms that the registry provisioning, client authentication, and image publication were executed flawlessly.
+> The successful **Pushed** state of all image layers confirms that the registry provisioning, client authentication, and image publication were executed flawlessly.
