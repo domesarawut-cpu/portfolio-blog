@@ -42,7 +42,7 @@ The implementation used a hybrid operating model separating infrastructure deplo
 
 The architecture is intentionally lightweight. Azure Container Registry acts as the private image repository, while the container image is built on the local workstation and then pushed to Azure.
 
-![Azure Container Registry Overview](@/assets/images/azure-task-20260925-225529.webp)
+![Azure Container Registry Overview](@/assets/images/azure-task-20260925-225529-acr-provined.webp)
 
 > [!NOTE]
 > This **hybrid workflow** (Portal for infrastructure creation, CLI for operational deployment) is a common pattern for proof-of-concept deployments and early-stage DevOps adoption before introducing full CI/CD automation.
@@ -78,7 +78,6 @@ Example of the cloud-build model:
 az acr build \
   --registry datacenteracr899172168 \
   --image myapp:latest \
-  .
 ```
 
 For enterprise delivery pipelines, ACR Tasks generally provide a cleaner operational model because compute is offloaded to Azure, reducing workstation variance and simplifying build automation.
@@ -145,5 +144,5 @@ az acr repository list \
   --output table
 ```
 
-[!SUCCESS]
-The successful Pushed state of all image layers confirms that the registry provisioning, client authentication, and image publication were executed flawlessly.
+> [!SUCCESS]
+> The successful Pushed state of all image layers confirms that the registry provisioning, client authentication, and image publication were executed flawlessly.
